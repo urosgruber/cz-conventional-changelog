@@ -16,7 +16,43 @@ var filter = function(array) {
 // fine.
 module.exports = function (options) {
 
+  var maxLineWidth = 72;
+
   var types = options.types;
+  var streams = [
+    {
+      "name": "MEM: Memberships",
+      "value": "MEM"
+    },
+    {
+      "name": "CON: Content",
+      "value": "CON"
+    },
+    {
+      "name": "MOB: Mobile",
+      "value": "MOB"
+    },
+    {
+      "name": "CAR: Careers",
+      "value": "CAR"
+    },
+    {
+      "name": "PLA: Platform, Infrastructure",
+      "value": "PLA"
+    },
+    {
+      "name": "COM: Community",
+      "value": "COM"
+    },{
+      "name": "CFE: Content",
+      "value": "CFE"
+    },
+    {
+      "name": "JET: Jet Ski",
+      "value": "JET"
+    }
+  ];
+
 
   var length = longest(Object.keys(types)).length + 1;
   var choices = map(types, function (type, key) {
@@ -39,7 +75,7 @@ module.exports = function (options) {
     // By default, we'll de-indent your commit
     // template and will keep empty lines.
     prompter: function(cz, commit) {
-      console.log('\nLine 1 will be cropped at 100 characters. All other lines will be wrapped after 100 characters.\n');
+      console.log('\nSubject will be cropped at ' + maxLineWidth + ' characters. Body will be wrapped after ' + maxLineWidth + ' characters.\n');
 
       // Let's ask some questions of the user
       // so that we can populate our commit
@@ -51,13 +87,15 @@ module.exports = function (options) {
       cz.prompt([
         {
           type: 'list',
+          name: 'stream',
+          message: 'Select the streams of change that you\'re committing:',
+          choices: streams,
+          default: "COM"
+        }, {
+          type: 'list',
           name: 'type',
           message: 'Select the type of change that you\'re committing:',
           choices: choices
-        }, {
-          type: 'input',
-          name: 'scope',
-          message: 'What is the scope of this change (e.g. component or file name)? (press enter to skip)\n'
         }, {
           type: 'input',
           name: 'subject',
@@ -82,18 +120,16 @@ module.exports = function (options) {
           type: 'confirm',
           name: 'isIssueAffected',
           message: 'Does this change affect any open issues?',
-          default: false
+          default: true
         }, {
           type: 'input',
-          name: 'issues',
-          message: 'Add issue references (e.g. "fix #123", "re #123".):\n',
+          name: 'issue',
+          message: 'Add issue reference (e.g. "123".):\n',
           when: function(answers) {
             return answers.isIssueAffected;
           }
         }
       ]).then(function(answers) {
-
-        var maxLineWidth = 100;
 
         var wrapOptions = {
           trim: true,
@@ -103,11 +139,13 @@ module.exports = function (options) {
         };
 
         // parentheses are only needed when a scope is present
+        answers.scope = '';
         var scope = answers.scope.trim();
         scope = scope ? '(' + answers.scope.trim() + ')' : '';
-
+        var issue = answers.issue ? '[' + answers.stream + '-' + answers.issue.trim() + '] ' : '';
+        
         // Hard limit this line
-        var head = (answers.type + scope + ': ' + answers.subject.trim()).slice(0, maxLineWidth);
+        var head = (issue + answers.type + scope + ': ' + answers.subject.trim()).slice(0, maxLineWidth);
 
         // Wrap these lines at 100 characters
         var body = wrap(answers.body, wrapOptions);
@@ -117,9 +155,8 @@ module.exports = function (options) {
         breaking = breaking ? 'BREAKING CHANGE: ' + breaking.replace(/^BREAKING CHANGE: /, '') : '';
         breaking = wrap(breaking, wrapOptions);
 
-        var issues = answers.issues ? wrap(answers.issues, wrapOptions) : '';
-
-        var footer = filter([ breaking, issues ]).join('\n\n');
+        
+        var footer = filter([ breaking ]).join('\n\n');
 
         commit(head + '\n\n' + body + '\n\n' + footer);
       });
