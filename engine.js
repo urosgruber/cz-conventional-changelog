@@ -92,6 +92,18 @@ module.exports = function (options) {
           choices: streams,
           default: "COM"
         }, {
+          type: 'confirm',
+          name: 'isIssueAffected',
+          message: 'Does this change affect any open issues?',
+          default: true
+        }, {
+          type: 'input',
+          name: 'issue',
+          message: 'Add issue reference (e.g. "123".):\n',
+          when: function(answers) {
+            return answers.isIssueAffected;
+          }
+        }, {
           type: 'list',
           name: 'type',
           message: 'Select the type of change that you\'re committing:',
@@ -115,18 +127,6 @@ module.exports = function (options) {
           message: 'Describe the breaking changes:\n',
           when: function(answers) {
             return answers.isBreaking;
-          }
-        }, {
-          type: 'confirm',
-          name: 'isIssueAffected',
-          message: 'Does this change affect any open issues?',
-          default: true
-        }, {
-          type: 'input',
-          name: 'issue',
-          message: 'Add issue reference (e.g. "123".):\n',
-          when: function(answers) {
-            return answers.isIssueAffected;
           }
         }
       ]).then(function(answers) {
