@@ -116,18 +116,6 @@ module.exports = function (options) {
           type: 'input',
           name: 'body',
           message: 'Provide a longer description of the change: (press enter to skip)\n'
-        }, {
-          type: 'confirm',
-          name: 'isBreaking',
-          message: 'Are there any breaking changes?',
-          default: false
-        }, {
-          type: 'input',
-          name: 'breaking',
-          message: 'Describe the breaking changes:\n',
-          when: function(answers) {
-            return answers.isBreaking;
-          }
         }
       ]).then(function(answers) {
 
@@ -149,12 +137,6 @@ module.exports = function (options) {
 
         // Wrap these lines at 100 characters
         var body = wrap(answers.body, wrapOptions);
-
-        // Apply breaking change prefix, removing it if already present
-        var breaking = answers.breaking ? answers.breaking.trim() : '';
-        breaking = breaking ? 'BREAKING CHANGE: ' + breaking.replace(/^BREAKING CHANGE: /, '') : '';
-        breaking = wrap(breaking, wrapOptions);
-
         
         var footer = filter([ breaking ]).join('\n\n');
 
