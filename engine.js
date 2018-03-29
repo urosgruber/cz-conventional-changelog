@@ -137,10 +137,8 @@ module.exports = function (options) {
 
         // Wrap these lines at 100 characters
         var body = wrap(answers.body, wrapOptions);
-        
-        var footer = filter([ breaking ]).join('\n\n');
 
-        commit(head + '\n\n' + body + '\n\n' + footer);
+        commit(head + '\n\n' + body );
       });
     }
   };
