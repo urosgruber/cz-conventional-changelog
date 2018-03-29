@@ -88,18 +88,18 @@ module.exports = function (options) {
         {
           type: 'list',
           name: 'stream',
-          message: 'Select the streams of change that you\'re committing:',
+          message: 'Select the stream of change that you\'re committing:',
           choices: streams,
           default: "COM"
         }, {
           type: 'confirm',
           name: 'isIssueAffected',
-          message: 'Does this change affect any open issues?',
+          message: 'Does this change have a ticket number?',
           default: true
         }, {
           type: 'input',
           name: 'issue',
-          message: 'Add issue reference (e.g. "123".):\n',
+          message: 'Add ticket number (e.g. "123".):\n',
           when: function(answers) {
             return answers.isIssueAffected;
           }
