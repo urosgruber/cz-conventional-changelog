@@ -2,8 +2,10 @@
 
 var wrap = require('word-wrap');
 var map = require('lodash.map');
+var find = require('lodash.find');
 var longest = require('longest');
 var rightPad = require('right-pad');
+var branch = require('git-branch');
 
 var filter = function(array) {
   return array.filter(function(x) {
@@ -17,6 +19,10 @@ var filter = function(array) {
 module.exports = function (options) {
 
   var maxLineWidth = 72;
+  var defaultStream = "COM";
+  var defaultTicket = null;
+
+  var branchName = branch.sync();
 
   var types = options.types;
   var streams = [
@@ -54,6 +60,18 @@ module.exports = function (options) {
   ];
 
 
+  var featureName = branchName.substring(branchName.indexOf("/")+1);
+
+  var streamGuess = find(streams, {"value": featureName.substring(0,3).toUpperCase()});
+  if (streamGuess) {
+    defaultStream = streamGuess.value;
+  } 
+
+  var ticketFound = featureName.match(/\d+/);
+  if (ticketFound) {
+    defaultTicket = ticketFound[0];
+  } 
+
   var length = longest(Object.keys(types)).length + 1;
   var choices = map(types, function (type, key) {
     return {
@@ -90,19 +108,12 @@ module.exports = function (options) {
           name: 'stream',
           message: 'Select the stream of change that you\'re committing:',
           choices: streams,
-          default: "COM"
-        }, {
-          type: 'confirm',
-          name: 'isIssueAffected',
-          message: 'Does this change have a ticket number?',
-          default: true
+          default: defaultStream
         }, {
           type: 'input',
           name: 'issue',
-          message: 'Add ticket number (e.g. "123".):\n',
-          when: function(answers) {
-            return answers.isIssueAffected;
-          }
+          message: 'Add ticket number (e.g. "123" or press enter to skip):\n',
+          default: defaultTicket
         }, {
           type: 'list',
           name: 'type',
@@ -126,14 +137,10 @@ module.exports = function (options) {
           width: maxLineWidth
         };
 
-        // parentheses are only needed when a scope is present
-        answers.scope = '';
-        var scope = answers.scope.trim();
-        scope = scope ? '(' + answers.scope.trim() + ')' : '';
-        var issue = answers.issue ? '[' + answers.stream + '-' + answers.issue.trim() + '] ' : '';
+        var issue = answers.issue ? '[' + answers.stream + '-' + answers.issue.trim() + '] ' : '[' + answers.stream + '] ';
         
         // Hard limit this line
-        var head = (issue + answers.type + scope + ': ' + answers.subject.trim()).slice(0, maxLineWidth);
+        var head = (issue + answers.type + ': ' + answers.subject.trim()).slice(0, maxLineWidth);
 
         // Wrap these lines at 100 characters
         var body = wrap(answers.body, wrapOptions);
