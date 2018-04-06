@@ -50,7 +50,7 @@ module.exports = function (options) {
       "name": "COM: Community",
       "value": "COM"
     },{
-      "name": "CFE: Content",
+      "name": "CFE: Community Frontend",
       "value": "CFE"
     },
     {
