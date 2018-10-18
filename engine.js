@@ -56,6 +56,10 @@ module.exports = function (options) {
     {
       "name": "JET: Jet Ski",
       "value": "JET"
+    },
+    {
+      "name": "CHN: China",
+      "value": "CHN"
     }
   ];
 
